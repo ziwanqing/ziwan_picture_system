@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ziwan.ziwanpicturebackend.exception.BusinessException;
 import com.ziwan.ziwanpicturebackend.exception.ErrorCode;
 import com.ziwan.ziwanpicturebackend.exception.ThrowUtils;
+import com.ziwan.ziwanpicturebackend.manager.sharding.DynamicShardingManager;
 import com.ziwan.ziwanpicturebackend.model.dto.space.SpaceAddRequest;
 import com.ziwan.ziwanpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.ziwan.ziwanpicturebackend.model.entity.Space;
@@ -57,6 +58,10 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     @Lazy
     private SpaceUserService spaceUserService;
 
+    @Resource
+    @Lazy
+    private DynamicShardingManager dynamicShardingManager;
+
     // 用户锁映射表
     private static final ConcurrentHashMap<Long, Object> LOCK_MAP = new ConcurrentHashMap<>();
 
@@ -64,7 +69,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     /**
      * 校验
      *
-     * @param space
+     * @param space  空间
      * @param add   是否为创建时校验
      */
     @Override
@@ -108,9 +113,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     /**
      * 获取空间包装类（单条）
      *
-     * @param space
-     * @param request
-     * @return
+     * @param space 空间
+     * @param request 请求
+     * @return 空的包装类
      */
     @Override
     public SpaceVO getSpaceVO(Space space, HttpServletRequest request) {
@@ -128,9 +133,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     /**
      * 获取空间包装类（分页）
      *
-     * @param spacePage
-     * @param request
-     * @return
+     * @param spacePage 分页信息
+     * @param request   请求
+     * @return 分页数据
      */
     @Override
     public Page<SpaceVO> getSpaceVOPage(Page<Space> spacePage, HttpServletRequest request) {
@@ -164,8 +169,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     /**
      * 获取查询条件
      *
-     * @param spaceQueryRequest
-     * @return
+     * @param spaceQueryRequest 查询条件
+     * @return 查询条件
      */
     @Override
     public QueryWrapper<Space> getQueryWrapper(SpaceQueryRequest spaceQueryRequest) {
@@ -223,9 +228,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     /**
      * 添加空间
      *
-     * @param spaceAddRequest
-     * @param loginUser
-     * @return
+     * @param spaceAddRequest 添加空间请求
+     * @param loginUser 登录用户
+     * @return 新增空间id
      */
     @Override
     public long addSpace(SpaceAddRequest spaceAddRequest, User loginUser) {
@@ -309,6 +314,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
 
                     }
 
+//                    dynamicShardingManager.createSpacePictureTable(space);
 
                     return space.getId();
                 });

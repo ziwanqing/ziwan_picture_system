@@ -77,6 +77,15 @@
             <version>3.4.2</version>
         </dependency>
 
+        <!-- 分库分表 -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-jdbc-core-spring-boot-starter</artifactId>
+            <version>5.2.0</version>
+        </dependency>
+
+
+
 
 
         <!--   https://doc.hutool.cn/-->
