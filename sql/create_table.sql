@@ -62,7 +62,7 @@ create table if not exists space
     spaceLevel int      default 0                 null comment '空间级别：0-普通版 1-专业版 2-旗舰版',
     maxSize    bigint   default 0                 null comment '空间图片的最大总大小',
     maxCount   bigint   default 0                 null comment '空间图片的最大数量',
-    picColor   varchar(16)                        null comment '图片主色调',
+    picColor  varchar(16)   null comment '图片主色调',
     totalSize  bigint   default 0                 null comment '当前空间下图片的总大小',
     totalCount bigint   default 0                 null comment '当前空间下的图片数量',
     userId     bigint                             not null comment '创建用户 id',
@@ -70,7 +70,7 @@ create table if not exists space
     editTime   datetime default CURRENT_TIMESTAMP not null comment '编辑时间',
     updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete   tinyint  default 0                 not null comment '是否删除',
-    spaceType  int      default 0                 not null comment '空间类型：0-私有 1-团队',
+    spaceType int default 0 not null comment '空间类型：0-私有 1-团队',
     -- 索引设计
     index idx_userId (userId),         -- 提升基于用户的查询效率
     index idx_spaceName (spaceName),   -- 提升基于空间名称的查询效率
@@ -95,56 +95,6 @@ create table if not exists space_user
 ) comment '空间用户关联' collate = utf8mb4_unicode_ci;
 
 ALTER TABLE picture
-    ADD COLUMN picColor VARCHAR(50) NULL COMMENT '图片颜色';
+ADD COLUMN picColor VARCHAR(50) NULL COMMENT '图片颜色';
 
 
-CREATE TABLE tb_voucher_order
-(
-    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    userId     BIGINT UNSIGNED  NOT NULL COMMENT '下单的用户ID',
-    voucherId  BIGINT UNSIGNED  NOT NULL COMMENT '购买的代金券ID',
-
-    payType    TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '支付方式：1余额；2支付宝；3微信',
-
-    status      TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '订单状态：1未支付；2已支付；3已核销；4已取消；5退款中；6已退款',
-
-    createTime TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '下单时间',
-    payTime    TIMESTAMP        NULL     DEFAULT NULL COMMENT '支付时间',
-    useTime    TIMESTAMP        NULL     DEFAULT NULL COMMENT '核销时间',
-    refundTime TIMESTAMP        NULL     DEFAULT NULL COMMENT '退款时间',
-    updateTime TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-
-    PRIMARY KEY (id),
-    KEY idx_userId (userId),
-    KEY idx_voucherId (voucherId),
-    KEY idx_status (status)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='代金券订单表';
-
-
-
-CREATE TABLE `tb_voucher` (
-                              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-                              `spaceId` bigint(20) unsigned DEFAULT NULL COMMENT '空间id',
-                              `title` varchar(255) NOT NULL COMMENT '代金券标题',
-                              `subTitle` varchar(255) DEFAULT NULL COMMENT '副标题',
-                              `rules` varchar(1024) DEFAULT NULL COMMENT '使用规则',
-                              `payValue` bigint(10) unsigned NOT NULL COMMENT '支付金额，单位分。例如200代表2元',
-                              `actualValue` bigint(10) unsigned NOT NULL COMMENT '抵扣金额，单位分。例如200代表2元',
-                              `type` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0-普通券；1-秒杀券',
-                              `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '1-上架；2-下架；3-过期',
-                              `createTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                              `updateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                              PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
-
-
-CREATE TABLE `tb_seckill_voucher` (
-                                      `voucherId` bigint(20) unsigned NOT NULL COMMENT '关联的优惠券id',
-                                      `stock` int(8) unsigned NOT NULL COMMENT '库存',
-                                      `createTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                      `beginTime` timestamp NOT NULL  default '0000-00-00 00:00:00' COMMENT '生效时间',
-                                      `endTime` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT '失效时间',
-                                      `updateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                      PRIMARY KEY (`voucherId`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='秒杀优惠券表，与优惠券表一对一关系';

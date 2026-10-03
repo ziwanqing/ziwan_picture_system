@@ -51,6 +51,7 @@
         </dependency>
 
 
+
         <!--  Spring Session Redis -->
         <dependency>
             <groupId>org.springframework.session</groupId>
@@ -84,12 +85,7 @@
         </dependency>
 
 
-        <!--   redisson     -->
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-            <version>3.22.0</version>
-        </dependency>
+
 
 
         <!--   https://doc.hutool.cn/-->

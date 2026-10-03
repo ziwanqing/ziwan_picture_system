@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+// todo 注意这个 mapper 改成自己的
 @MapperScan("com.ziwan.ziwanpicturebackend.mapper")
 public class MyBatisPlusConfig {
 

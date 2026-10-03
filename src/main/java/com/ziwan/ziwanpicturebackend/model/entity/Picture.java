@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * 图片
- * &#064;TableName  picture
+ *
+ * @TableName picture
  */
 @TableName(value = "picture")
 @Data
