@@ -56,6 +56,12 @@ public class AuthInterceptor {
         if(true){
             return joinPoint.proceed();
         }
+        if(true){
+            return joinPoint.proceed();
+        }
+        if(true){
+            return joinPoint.proceed();
+        }
         // 通过权限校验，放行
         return joinPoint.proceed();
     }
