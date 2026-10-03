@@ -35,6 +35,7 @@ import com.ziwan.ziwanpicturebackend.mapper.PictureMapper;
 import com.ziwan.ziwanpicturebackend.service.SpaceService;
 import com.ziwan.ziwanpicturebackend.service.SpaceUserService;
 import com.ziwan.ziwanpicturebackend.service.UserService;
+import com.ziwan.ziwanpicturebackend.service.impl.result.MyPictureService;
 import com.ziwan.ziwanpicturebackend.utils.ColorSimilarUtils;
 import com.ziwan.ziwanpicturebackend.utils.ColorTransformUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +94,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private SpaceUserService spaceUserService;
+
+    @Resource
+    private Executor ziwanPictureExecutor;
+
+    @Resource
+    private MyPictureService myPictureService;
+
+
+
 
     /**
      * 验证
@@ -165,7 +177,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
             QueryWrapper<SpaceUser> spaceUserQueryWrapper = new QueryWrapper<>();
             spaceId = oldPicture.getSpaceId();
-            if (spaceId != null){
+            if (spaceId != null) {
                 spaceUserQueryWrapper.eq("spaceId", spaceId);
                 spaceUserQueryWrapper.eq("userId", loginUser.getId());
                 SpaceUser spaceUser = spaceUserService.getOne(spaceUserQueryWrapper);
@@ -178,8 +190,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
                     }
 
                 }
-            }
-            else {
+            } else {
                 if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
                     throw new BusinessException(ErrorCode.NO_AUTO_ERROR);
                 }
@@ -765,20 +776,33 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         if (pictureList.isEmpty()) {
             return;
         }
-        // 4. 更新分类和标签
-        pictureList.forEach(picture -> {
-            if (StrUtil.isNotBlank(category)) {
-                picture.setCategory(category);
-            }
-            if (CollUtil.isNotEmpty(tags)) {
-                picture.setTags(JSONUtil.toJsonStr(tags));
-            }
-        });
-        // 5. 批量重命名
-        String nameRule = pictureEditByBatchRequest.getNameRule();
-        fillPictureWithNameRule(pictureList, nameRule);
+
+        int batchSize = 100;
+        ArrayList<CompletableFuture<Void>> futureList = new ArrayList<>();
+
+        for (int i = 0; i < pictureList.size(); i += batchSize) {
+            List<Picture> subList = pictureList.subList(i, Math.min(i + batchSize, pictureList.size()));
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                subList.forEach(picture -> {
+                    // 4. 更新分类和标签
+                    if (StrUtil.isNotBlank(category)){
+                        picture.setCategory(category);
+                    }
+                    if (CollUtil.isNotEmpty(tags)) {
+                        picture.setTags(JSONUtil.toJsonStr(tags));
+                    }
+
+                });
+                // 5. 批量重命名
+                String nameRule = pictureEditByBatchRequest.getNameRule();
+                fillPictureWithNameRule(subList, nameRule);
+            }, ziwanPictureExecutor);
+            futureList.add(future);
+
+        }
+        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
         // 6. 操作数据库进行批量更新
-        boolean result = this.updateBatchById(pictureList);
+        boolean result = myPictureService.updateBatchById(pictureList);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "批量编辑失败");
     }
 
