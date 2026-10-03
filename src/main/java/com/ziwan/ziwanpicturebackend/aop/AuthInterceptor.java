@@ -53,6 +53,10 @@ public class AuthInterceptor {
         if (UserRoleEnum.ADMIN.equals(mustRoleEnum) && !UserRoleEnum.ADMIN.equals(userRoleEnum)) {
             throw new BusinessException(ErrorCode.NO_AUTO_ERROR);
         }
+        if(true){
+            // 通过权限校验，放行
+            return joinPoint.proceed();
+        }
         // 通过权限校验，放行
         return joinPoint.proceed();
     }
